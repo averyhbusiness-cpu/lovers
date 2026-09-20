@@ -1,0 +1,13 @@
+// CI-only config for the main site Worker. The dist/ directory is assembled by
+// .github/workflows/deploy.yml so that CLAUDE.md, SETUP-order-123.md and worker/
+// never reach a public origin.
+//
+// Note: this file blocks the dashboard's Deploy button if it ends up inside a
+// manual "Upload your static files" zip. Keep it out of that zip.
+{
+  "name": "royal-resonance-dd53",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
