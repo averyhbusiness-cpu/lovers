@@ -1,0 +1,11 @@
+// Only needed if you ever deploy this from a terminal with the wrangler CLI.
+// The dashboard route in SETUP-order-123.md does not use this file at all.
+{
+  "name": "storefrontfix-uploader",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-01",
+  "r2_buckets": [
+    { "binding": "SITES", "bucket_name": "storefrontfix-sites" }
+  ]
+  // ADMIN_KEY is a secret — set it with:  npx wrangler secret put ADMIN_KEY
+}

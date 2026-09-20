@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — Maple Street Auto</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<p class="demo">Example site — Maple Street Auto is not a real business.</p>
+<div class="bar"><div class="wrap"><b>Maple Street Auto</b><a href="tel:+15075550143">Call (507) 555-0143</a></div></div>
+<nav><div class="wrap">
+<a href="index.html">Home</a>
+<a href="services.html">Services</a>
+<a href="hours.html">Hours &amp; location</a>
+<a href="contact.html" class="on">Contact</a>
+</div></nav>
+
+<main><div class="wrap">
+<h1>Get in touch</h1>
+<p>Tell us what the car is doing and we will call you back the same day. Calling is faster if it is urgent.</p>
+<form id="f">
+<label for="n">Your name</label><input id="n" type="text">
+<label for="p">Phone</label><input id="p" type="tel">
+<label for="m">What's going on with the car?</label><textarea id="m"></textarea>
+<button type="submit">Send</button>
+</form>
+<h2>Or just call</h2>
+<p><a href="tel:+15075550143">(507) 555-0143</a> &mdash; Mon to Fri 7 to 5, Saturday 8 to noon.</p>
+</div></main>
+<script>
+document.getElementById("f").addEventListener("submit",function(e){
+  e.preventDefault();
+  this.innerHTML="<h2>Thanks &mdash; we will call you back.</h2>"+
+                 "<p>This is an example site, so nothing was actually sent.</p>";
+});
+</script>
+
+<footer><div class="wrap">
+<p><b style="color:#fff">Maple Street Auto</b></p>
+<p>412 Maple Street, Byron, MN 55920</p>
+<p><a href="tel:+15075550143">(507) 555-0143</a> · Mon&ndash;Fri 7&ndash;5, Sat 8&ndash;noon</p>
+<p style="margin-top:14px">Example site. Not a real business.</p>
+</div></footer>
+</body>
+</html>

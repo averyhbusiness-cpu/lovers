@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--
+  HOME — v7. Self-contained: all CSS and JS inline.
+  Fill in: [[YOUR NAME]]
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storefront Fix — Websites for small businesses</title>
+<meta name="description" content="I build websites for small local businesses and host them, so the people looking you up find something worth calling.">
+<style>
+:root{
+  color-scheme:dark;
+  --void:#030406;
+  --deep:#070910;
+  --panel:#0a0d15;
+  --ink:#e9eaee;
+  --ink2:#8b8f9b;
+  --ink3:#565b68;
+  --line:rgba(255,255,255,.08);
+  --line2:rgba(255,255,255,.17);
+  --ice:#a8c4e8;
+  --ease:cubic-bezier(.16,.84,.44,1);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;background:var(--void)}
+body{
+  margin:0;background:var(--void);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.5;letter-spacing:-.011em;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+.shell{width:100%;max-width:1180px;margin:0 auto;padding:0 26px;position:relative;z-index:2}
+
+h1,h2{margin:0;font-weight:500;letter-spacing:-.045em;line-height:.95;text-wrap:balance}
+h1{font-size:clamp(3rem,11.5vw,7.4rem)}
+h2{font-size:clamp(2.2rem,6.4vw,3.9rem)}
+p{margin:0 0 1.2em}p:last-child{margin-bottom:0}
+a{color:var(--ink);text-decoration:none}
+
+.lede{font-size:clamp(1.0625rem,1.8vw,1.25rem);line-height:1.6;color:var(--ink2);max-width:46ch}
+.note{font-size:.9375rem;line-height:1.65;color:var(--ink3);max-width:54ch}
+.tag{font-size:.8125rem;color:var(--ink3);margin:0 0 24px}
+:focus-visible{outline:1px solid var(--ice);outline-offset:5px}
+.fill{color:#d9b25f;border-bottom:1px dotted #d9b25f}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:60;
+  background:linear-gradient(180deg,rgba(3,4,6,.94),rgba(3,4,6,0));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:18px;
+  height:62px;max-width:1180px;margin:0 auto;padding:0 26px}
+.brand{font-size:.9375rem;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
+.links{display:flex;gap:22px;list-style:none;margin:0;padding:0;overflow-x:auto;scrollbar-width:none}
+.links::-webkit-scrollbar{display:none}
+.links a{font-size:.8125rem;color:var(--ink2);white-space:nowrap}
+.links a:hover,.links a[aria-current=page]{color:var(--ink)}
+@media(min-width:900px){.nav-in{height:70px}.links{gap:30px}}
+@media(max-width:720px){
+  .nav-in{flex-direction:column;justify-content:center;gap:7px;height:auto;padding:9px 16px 11px}
+  .brand{font-size:.875rem}
+  .links{gap:20px;justify-content:center;width:100%;overflow:visible}
+  .links a{font-size:.8125rem}
+}
+
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;
+  justify-content:flex-end;padding:130px 0 92px;overflow:hidden}
+.stars{position:absolute;inset:0;pointer-events:none;z-index:0;animation:drift 170s linear infinite}
+.stars i{position:absolute;width:1px;height:1px;background:#fff;border-radius:50%}
+@keyframes drift{to{transform:translateY(-90px)}}
+.neb{position:absolute;pointer-events:none;z-index:0;border-radius:50%;filter:blur(90px)}
+.neb1{width:70vw;height:50vh;left:-14vw;top:4vh;background:radial-gradient(ellipse,rgba(58,84,140,.24),transparent 68%)}
+.neb2{width:60vw;height:44vh;right:-12vw;top:22vh;background:radial-gradient(ellipse,rgba(38,64,112,.2),transparent 68%)}
+.horizon{position:absolute;left:50%;bottom:-32vh;width:180vw;height:80vh;z-index:0;
+  transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(ellipse 50% 100% at 50% 100%,rgba(168,196,232,.22),rgba(110,140,190,.06) 40%,transparent 72%)}
+.hero h1{margin-bottom:32px}
+
+.band{padding:104px 0;border-top:1px solid var(--line);position:relative}
+@media(min-width:900px){.band{padding:150px 0}}
+.band-head{margin-bottom:56px;max-width:30ch}
+.band-head .note{margin-top:22px}
+@media(min-width:900px){.band-head{margin-bottom:76px}}
+
+.figs{display:grid;gap:58px}
+@media(min-width:860px){.figs{grid-template-columns:repeat(3,1fr);gap:36px}}
+.fig{border-top:1px solid var(--line);padding-top:24px}
+.fignum{font-size:clamp(3.4rem,8.6vw,5.4rem);font-weight:500;letter-spacing:-.055em;
+  line-height:.9;margin:0 0 18px;font-variant-numeric:tabular-nums}
+.figtxt{font-size:1.0625rem;color:var(--ink2);max-width:22ch;margin:0 0 12px;line-height:1.5}
+.figsrc{font-size:.75rem;color:var(--ink3);margin:0;line-height:1.5}
+
+.pair{display:grid;gap:1px;background:var(--line)}
+@media(min-width:840px){.pair{grid-template-columns:1fr 1fr}}
+.panel{background:var(--deep);padding:32px 26px 36px}
+.panel.live{background:var(--panel)}
+.plabel{font-size:.75rem;color:var(--ink3);margin:0 0 22px}
+.panel.live .plabel{color:var(--ink)}
+.pname{font-size:1.3125rem;font-weight:500;letter-spacing:-.03em;margin:0 0 4px;color:var(--ink3)}
+.panel.live .pname{color:var(--ink)}
+.pmeta{font-size:.8125rem;color:var(--ink3);margin:0 0 26px}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{position:relative;padding:13px 0 13px 28px;border-top:1px solid var(--line);
+  font-size:.9375rem;line-height:1.45;color:var(--ink3)}
+.rows li::before{position:absolute;left:0;top:13px;font-size:.8125rem}
+.rows .off::before{content:"\2715"}
+.panel.live .rows li{color:var(--ink)}
+.rows .on::before{content:"\2713";color:var(--ice)}
+
+.foot{border-top:1px solid var(--line);padding:52px 0 66px;font-size:.8125rem;color:var(--ink3)}
+.foot a{color:var(--ink2)}
+.foot a:hover{color:var(--ink)}
+.foot-nav{display:flex;flex-wrap:wrap;gap:12px 26px;list-style:none;margin:0 0 30px;padding:0}
+.foot p{margin:0 0 8px}
+.admin-link{float:right;color:var(--ink3)!important;opacity:.55}
+.admin-link:hover{opacity:1}
+
+.js .rv{opacity:0}
+.js .rv.in{opacity:1;transition:opacity 1s var(--ease)}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}.js .rv{opacity:1}.stars{animation:none}*{transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">Storefront Fix</a>
+    <nav aria-label="Main">
+      <ul class="links">
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="hosting.html">Hosting</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <span class="neb neb1" aria-hidden="true"></span>
+    <span class="neb neb2" aria-hidden="true"></span>
+    <div class="stars" id="stars" aria-hidden="true"></div>
+    <div class="horizon" aria-hidden="true"></div>
+
+    <div class="shell">
+      <p class="tag rv">Websites for small businesses</p>
+      <h1 class="rv">They looked<br>you up</h1>
+      <p class="lede rv">Before anyone calls you, they search your name. What comes up decides whether they call at all, and you never hear from the ones who decide against it. I build the site that should come up, and I keep it running after it goes live.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="shell">
+      <div class="band-head rv">
+        <h2>Why the website matters</h2>
+        <p class="note">People look you up before they call you. If they find nothing, or a Facebook page nobody has posted on since 2021, they draw their own conclusions about how you run things. Here is what the research says about that.</p>
+      </div>
+
+      <div class="figs">
+        <div class="fig rv">
+          <p class="fignum">84%</p>
+          <p class="figtxt">of consumers searched for a local business online in the past three months</p>
+          <p class="figsrc">BrightLocal Consumer Search Behavior, 2026</p>
+        </div>
+        <div class="fig rv">
+          <p class="fignum">+41%</p>
+          <p class="figtxt">more trust in a business that has its own website than one that has none</p>
+          <p class="figsrc">DreamHost Local Business Trust Index, 2026, 1,200+ US consumers</p>
+        </div>
+        <div class="fig rv">
+          <p class="fignum">$177</p>
+          <p class="figtxt">what people will comfortably spend through a real website, against $36 through a social page</p>
+          <p class="figsrc">Same survey, average comfortable spend</p>
+        </div>
+      </div>
+
+      <p class="note rv" style="margin-top:72px">None of that guarantees you a single new customer, and I am not going to pretend otherwise. What it buys you is that the people already looking for you can find you, and they believe what they see when they do.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="shell">
+      <div class="band-head rv">
+        <h2>What changes</h2>
+        <p class="note">What somebody finds when they go looking for you, before and after.</p>
+      </div>
+
+      <div class="pair rv">
+        <div class="panel">
+          <p class="plabel">Before</p>
+          <p class="pname">No website</p>
+          <p class="pmeta">What they find today</p>
+          <ul class="rows">
+            <li class="off">A map pin and a phone number, nothing else</li>
+            <li class="off">No hours listed anywhere they can check</li>
+            <li class="off">No way to see what you actually do</li>
+            <li class="off">A social page nobody has posted on in years</li>
+            <li class="off">The competitor two towns over has a site</li>
+          </ul>
+        </div>
+        <div class="panel live">
+          <p class="plabel">After</p>
+          <p class="pname">Your site, live</p>
+          <p class="pmeta">What they find instead</p>
+          <ul class="rows">
+            <li class="on">Hours, services and phone on one page</li>
+            <li class="on">Photos of the actual building and the work</li>
+            <li class="on">Built for a phone first, because that is what they are holding</li>
+            <li class="on">Loads in about a second</li>
+            <li class="on">You call me when something changes and I change it</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="shell">
+    <ul class="foot-nav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="hosting.html">Hosting</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <p><a class="admin-link" href="admin.html">Admin</a>Storefront Fix &mdash; Avery</p>
+    <p><a href="tel:+15075174697">(507) 517-4697</a> &nbsp; <a href="mailto:averyhbusiness@gmail.com">averyhbusiness@gmail.com</a></p>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add("js");
+var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+(function(){
+  var host=document.getElementById("stars"); if(!host) return;
+  var f=document.createDocumentFragment();
+  for(var i=0;i<120;i++){
+    var s=document.createElement("i");
+    s.style.left=(Math.random()*100).toFixed(2)+"%";
+    s.style.top=(Math.random()*115).toFixed(2)+"%";
+    s.style.opacity=(0.12+Math.random()*0.55).toFixed(2);
+    if(Math.random()>0.9){s.style.width="2px";s.style.height="2px"}
+    f.appendChild(s);
+  }
+  host.appendChild(f);
+})();
+
+(function(){
+  var items=document.querySelectorAll(".rv"); if(!items.length) return;
+  if(reduced||!("IntersectionObserver" in window)){
+    items.forEach(function(el){el.classList.add("in")}); return;
+  }
+  var io=new IntersectionObserver(function(en){
+    en.forEach(function(e){ if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)} });
+  },{rootMargin:"0px 0px -8% 0px",threshold:.06});
+  items.forEach(function(el){io.observe(el)});
+})();
+</script>
+
+</body>
+</html>

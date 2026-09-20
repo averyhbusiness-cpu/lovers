@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<!--
+  HOSTING PAGE — storefrontfix.com/hosting.html
+  ===========================================================================
+  Client types the code. His full website opens filling the screen — real
+  links, real forms, real scrolling. Small X in the corner to come back.
+
+  WHERE THE CLIENT SITES LIVE — one line, in the script at the bottom:
+
+      var SITES_BASE = "/sites/";
+
+  Code "maple-street" looks for /sites/maple-street/index.html
+  So: a folder called "sites" next to this file, one folder per client named
+  exactly their code, their site inside as index.html.
+
+  Move the sites to a different host later and you change that one line.
+
+  TRY IT NOW: type  demo  — there's a sample site built into this file.
+  ===========================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hosting — Storefront Fix</title>
+<meta name="robots" content="noindex">
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%;background:#030406}
+body{
+  margin:0;background:#030406;color:#e9eaee;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;
+}
+body.viewing{overflow:hidden}
+
+.mark{
+  position:absolute;top:24px;left:26px;z-index:5;
+  font-size:15px;font-weight:600;letter-spacing:-.02em;
+  color:#8b8f9b;text-decoration:none;
+}
+.mark:hover{color:#e9eaee}
+
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.stars i{position:absolute;width:1px;height:1px;background:#fff;border-radius:50%}
+.horizon{position:fixed;left:50%;bottom:-34vh;width:180vw;height:80vh;z-index:0;
+  transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(ellipse 50% 100% at 50% 100%,rgba(168,196,232,.2),rgba(110,140,190,.05) 40%,transparent 72%)}
+
+.center{flex:1;display:flex;align-items:center;padding:96px 26px 60px;position:relative;z-index:2}
+.col{width:100%;max-width:420px;margin:0 auto}
+
+label{display:block;font-size:13px;font-weight:500;color:#8b8f9b;margin-bottom:18px}
+
+input{
+  width:100%;font-family:inherit;
+  font-size:36px;font-weight:600;letter-spacing:-.025em;
+  color:#e9eaee;background:transparent;
+  border:0;border-bottom:1px solid rgba(255,255,255,.17);
+  border-radius:0;padding:0 0 14px;
+  transition:border-color .15s;
+}
+input::placeholder{color:#3c414c}
+input:focus{outline:none;border-bottom-color:#a8c4e8}
+@media(min-width:600px){input{font-size:44px}}
+
+button{
+  margin-top:28px;width:100%;
+  font-family:inherit;font-size:16px;font-weight:600;letter-spacing:-.01em;
+  color:#030406;background:#e9eaee;
+  border:0;border-radius:0;padding:17px 20px;cursor:pointer;
+  transition:opacity .15s;
+}
+button:hover{opacity:.86}
+button:disabled{opacity:.35;cursor:default}
+
+.err{font-size:13px;color:#d9584e;margin:16px 0 0;min-height:1em}
+.load{background:#030406!important}
+.load span{color:#565b68!important}
+
+.viewer{position:fixed;inset:0;z-index:200;background:#fff;display:none}
+.viewer.open{display:block}
+.viewer iframe{width:100%;height:100%;border:0;display:block}
+
+.load{position:absolute;inset:0;background:#0b0b0b;display:grid;place-items:center;z-index:2}
+.load.gone{display:none}
+.load span{font-size:13px;color:#6d6d6b}
+
+.exit{
+  position:fixed;z-index:210;
+  top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;
+  width:36px;height:36px;border:0;border-radius:50%;cursor:pointer;
+  background:rgba(11,11,11,.74);color:#fff;font-size:17px;line-height:1;padding:0;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+}
+.viewer.open ~ .exit{display:flex}
+.exit:hover{background:#0b0b0b}
+</style>
+</head>
+<body>
+
+<a class="mark" href="index.html">Storefront Fix</a>
+<div class="stars" id="stars" aria-hidden="true"></div>
+<div class="horizon" aria-hidden="true"></div>
+
+<div class="center">
+  <form class="col" id="form">
+    <label for="code">Enter your hosting code</label>
+    <input id="code" name="code" type="text" inputmode="latin"
+           autocomplete="off" autocapitalize="none" autocorrect="off"
+           spellcheck="false" placeholder="your-code">
+    <button type="submit" id="go">Open</button>
+    <p class="err" id="err" role="status"></p>
+  </form>
+</div>
+
+<div class="viewer" id="viewer">
+  <div class="load" id="load"><span>Loading</span></div>
+  <iframe id="frame" title="Website preview" referrerpolicy="no-referrer"></iframe>
+</div>
+<button class="exit" id="exit" type="button" aria-label="Close">&#10005;</button>
+
+<script>
+/* =========================================================================
+   Where client sites live. Code "maple-street" -> /sites/maple-street/index.html
+   ========================================================================= */
+var SITES_BASE = "/sites/";
+
+/* Sample site so you can test this page before uploading anything.
+   Type "demo" as the code. It's a real 4-page site — the nav links work.
+   Delete this block and the marked line below once you have real clients. */
+var DEMO_PAGES = {};
+
+function demoShell(active, body){
+  function tab(key,label){
+    return '<a href="'+key+'.html" data-page="'+key+'"'+
+           (key===active?' class="on"':'')+'>'+label+'</a>';
+  }
+  return '<!DOCTYPE html><html><head><meta charset="utf-8">'+
+  '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+  '<title>Maple Street Auto</title><style>'+
+  'body{margin:0;font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#1a1a1a}'+
+  'header{background:#11253d;color:#fff;padding:18px 22px;display:flex;'+
+  'justify-content:space-between;align-items:center}'+
+  'header b{font-size:18px}header a{color:#fff;text-decoration:none;font-size:13px;font-weight:600}'+
+  'nav{background:#f9fafb;padding:14px 22px;border-bottom:1px solid #e5e7eb;overflow-x:auto;white-space:nowrap}'+
+  'nav a{margin-right:20px;color:#11253d;font-size:14px;font-weight:600;text-decoration:none}'+
+  'nav a.on{border-bottom:2px solid #11253d;padding-bottom:3px}'+
+  'main{padding:40px 22px;max-width:640px}h1{font-size:32px;letter-spacing:-.03em;margin:0 0 14px}'+
+  'h2{font-size:21px;margin:34px 0 12px}p{color:#4b5563;max-width:36ch;line-height:1.6}'+
+  'ul{padding-left:20px;color:#4b5563;line-height:1.9}'+
+  '.cta{display:inline-block;background:#11253d;color:#fff;padding:14px 24px;'+
+  'border-radius:8px;text-decoration:none;font-weight:600;margin-top:18px}'+
+  'label{display:block;font-size:13px;font-weight:600;margin:16px 0 6px}'+
+  'input,textarea{width:100%;max-width:360px;font:inherit;padding:11px 13px;'+
+  'border:1px solid #cbd2dc;border-radius:7px}textarea{min-height:96px}'+
+  'button{margin-top:18px;background:#11253d;color:#fff;border:0;padding:13px 26px;'+
+  'border-radius:8px;font:inherit;font-weight:600;cursor:pointer}'+
+  'footer{background:#11253d;color:#9fb0c4;padding:26px 22px;font-size:13px;margin-top:46px}'+
+  '</style></head><body>'+
+  '<header><b>Maple Street Auto</b><a href="tel:+15075550143">Call (507) 555-0143</a></header>'+
+  '<nav>'+tab('index','Home')+tab('services','Services')+tab('hours','Hours &amp; location')+tab('contact','Contact')+'</nav>'+
+  '<main>'+body+'</main>'+
+  '<footer>Maple Street Auto &mdash; sample site, not a real business.</footer>'+
+  '</body></html>';
+}
+
+DEMO_PAGES.index = demoShell('index',
+  '<h1>Brakes, tires and honest work.</h1>'+
+  "<p>Family owned since 1987. Same mechanics, same shop, no upsells you didn't ask for.</p>"+
+  '<a class="cta" href="tel:+15075550143">Call the shop</a>'+
+  '<h2>Why people come here</h2><ul><li>Same-day brake work most weeks</li>'+
+  '<li>We show you the old part</li><li>Written estimate before we start</li></ul>');
+
+DEMO_PAGES.services = demoShell('services',
+  '<h1>What we do</h1><ul><li>Brakes and rotors</li><li>Tires, mounting and balancing</li>'+
+  '<li>Alignments</li><li>Oil and fluid changes</li><li>Engine diagnostics</li>'+
+  '<li>State inspections</li><li>Batteries and starters</li></ul>'+
+  '<h2>What we don\'t do</h2><p>Body work, glass, or transmissions. We will tell you who does.</p>'+
+  '<a class="cta" href="contact.html" data-page="contact">Ask about your car</a>');
+
+DEMO_PAGES.hours = demoShell('hours',
+  '<h1>Hours &amp; location</h1><ul><li>Mon&ndash;Fri: 7:00am &ndash; 5:00pm</li>'+
+  '<li>Saturday: 8:00am &ndash; noon</li><li>Sunday: closed</li></ul>'+
+  '<h2>Where we are</h2><p>412 Maple Street<br>Byron, MN 55920</p>'+
+  '<p>Behind the hardware store. Park in the lot off Third.</p>'+
+  '<a class="cta" href="tel:+15075550143">Call before you come</a>');
+
+DEMO_PAGES.contact = demoShell('contact',
+  '<h1>Get in touch</h1><p>Tell us what the car is doing and we will call you back same day.</p>'+
+  '<form onsubmit="event.preventDefault();this.innerHTML=\'<h2>Thanks &mdash; we will call you back.</h2>\'">'+
+  '<label>Your name</label><input type="text">'+
+  '<label>Phone</label><input type="tel">'+
+  '<label>What is going on with the car?</label><textarea></textarea>'+
+  '<button type="submit">Send</button></form>');
+
+(function(){
+  var host=document.getElementById("stars"); if(!host) return;
+  var f=document.createDocumentFragment();
+  for(var i=0;i<80;i++){
+    var st=document.createElement("i");
+    st.style.left=(Math.random()*100).toFixed(2)+"%";
+    st.style.top=(Math.random()*100).toFixed(2)+"%";
+    st.style.opacity=(0.12+Math.random()*0.5).toFixed(2);
+    if(Math.random()>0.9){st.style.width="2px";st.style.height="2px"}
+    f.appendChild(st);
+  }
+  host.appendChild(f);
+})();
+
+(function () {
+  var form  = document.getElementById("form");
+  var input = document.getElementById("code");
+  var errEl = document.getElementById("err");
+  var go    = document.getElementById("go");
+  var view  = document.getElementById("viewer");
+  var frame = document.getElementById("frame");
+  var load  = document.getElementById("load");
+  var exit  = document.getElementById("exit");
+
+  function clean(v){
+    return String(v).toLowerCase().trim().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"");
+  }
+  function fail(msg){
+    errEl.textContent = msg;
+    go.disabled = false; go.textContent = "Open";
+    input.focus(); input.select();
+  }
+  var stuckTimer;
+  function open_(){
+    load.classList.remove("gone");
+    view.classList.add("open");
+    document.body.classList.add("viewing");
+    clearTimeout(stuckTimer);
+    stuckTimer = setTimeout(function(){ load.classList.add("gone"); }, 6000);
+  }
+  function close_(){
+    view.classList.remove("open");
+    document.body.classList.remove("viewing");
+    frame.removeAttribute("srcdoc");
+    frame.src = "about:blank";
+    go.disabled = false; go.textContent = "Open";
+    clearTimeout(stuckTimer);
+  }
+
+  frame.addEventListener("load", function(){
+    clearTimeout(stuckTimer);
+    if (view.classList.contains("open")) load.classList.add("gone");
+  });
+  exit.addEventListener("click", close_);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && view.classList.contains("open")) close_();
+  });
+
+  /* DEMO only: makes the fake site's nav links work inside the frame.
+     Real client sites need none of this — their links already work. */
+  function showDemo(page){
+    frame.removeAttribute("src");
+    frame.srcdoc = DEMO_PAGES[page] || DEMO_PAGES.index;
+    frame.addEventListener("load", wireDemo, { once: true });
+  }
+  function wireDemo(){
+    var doc;
+    try { doc = frame.contentDocument; } catch (err) { return; }
+    if (!doc) return;
+    doc.addEventListener("click", function(e){
+      var a = e.target.closest ? e.target.closest("a[data-page]") : null;
+      if (!a) return;
+      e.preventDefault();
+      showDemo(a.getAttribute("data-page"));
+    });
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    errEl.textContent = "";
+    var code = clean(input.value);
+    if (!code) { fail("Enter the code I sent you."); return; }
+
+    go.disabled = true; go.textContent = "Checking";
+
+    /* DEMO — delete these two lines when you have real sites */
+    if (code === "demo") { open_(); showDemo("index"); return; }
+
+    var url = SITES_BASE + code + "/";
+
+    /* Opened straight off the hard drive? fetch is blocked there, so skip the
+       check and just load it. Folders need index.html in them. */
+    if (location.protocol === "file:") {
+      open_();
+      frame.src = url + "index.html";
+      return;
+    }
+
+    fetch(url, { method: "GET" })
+      .then(function(res){
+        if (!res.ok) throw new Error("missing");
+        open_();
+        frame.src = url;
+      })
+      .catch(function(){
+        /* Network hiccup rather than a bad code — try loading it anyway. */
+        open_();
+        frame.src = url;
+      });
+  });
+
+  /* hosting.html?code=maple-street skips the typing */
+  var given = new URLSearchParams(window.location.search).get("code");
+  if (given) {
+    input.value = clean(given);
+    form.dispatchEvent(new Event("submit", { cancelable: true }));
+  }
+})();
+</script>
+
+</body>
+</html>

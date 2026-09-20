@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!--
+  ADMIN — storefrontfix.com/admin.html        (order 123)
+  ===========================================================================
+  This is the page you use. Nobody else should ever see it.
+
+  Drag a client's folder in, type their code, hit upload. It goes straight to
+  R2 and is live at storefrontfix.com/sites/<code>/ within seconds.
+
+  It does nothing at all until the worker is set up — see SETUP-order-123.md.
+
+  THE ADMIN KEY IS THE ONLY LOCK ON THIS. Anyone who has it can upload and
+  delete client sites. Do not put it in a text message, and do not tick
+  "remember" on a computer that is not yours.
+  ===========================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Storefront Fix</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{
+  color-scheme:dark;
+  --void:#030406;--deep:#070910;--panel:#0a0d15;
+  --ink:#e9eaee;--ink2:#8b8f9b;--ink3:#565b68;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.17);
+  --ice:#a8c4e8;--good:#5fd39a;--bad:#d9584e;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--void)}
+body{margin:0;background:var(--void);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;
+  font-size:17px;line-height:1.5;letter-spacing:-.011em;-webkit-font-smoothing:antialiased;
+  min-height:100svh}
+.wrap{max-width:620px;margin:0 auto;padding:54px 24px 90px}
+h1{margin:0 0 8px;font-size:clamp(2rem,7vw,2.8rem);font-weight:500;letter-spacing:-.04em}
+h2{margin:44px 0 16px;font-size:1.0625rem;font-weight:600;letter-spacing:-.02em}
+p{margin:0 0 14px}
+a{color:var(--ice);text-decoration:none}
+.sub{color:var(--ink3);font-size:.9375rem;margin-bottom:38px}
+label{display:block;font-size:.8125rem;font-weight:500;color:var(--ink2);margin:0 0 8px}
+input[type=text],input[type=password]{width:100%;font:inherit;font-size:1.0625rem;color:var(--ink);
+  background:var(--deep);border:1px solid var(--line2);border-radius:8px;padding:14px 15px}
+input:focus{outline:none;border-color:var(--ice);box-shadow:0 0 0 3px rgba(168,196,232,.16)}
+button{font:inherit;font-size:1rem;font-weight:600;cursor:pointer;border:0;border-radius:8px;
+  padding:14px 24px;background:var(--ink);color:var(--void)}
+button:hover{background:#fff}
+button:disabled{opacity:.4;cursor:default}
+button.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}
+button.ghost:hover{background:rgba(255,255,255,.06)}
+button.danger{background:transparent;color:var(--bad);box-shadow:inset 0 0 0 1px rgba(217,88,78,.5);
+  font-size:.8125rem;padding:8px 14px}
+button.danger:hover{background:rgba(217,88,78,.12)}
+.row{margin-bottom:18px}
+.msg{font-size:.875rem;margin-top:14px;min-height:1.2em}
+.msg.ok{color:var(--good)} .msg.err{color:var(--bad)} .msg.busy{color:var(--ink2)}
+.hide{display:none}
+
+.drop{border:1px dashed var(--line2);border-radius:12px;padding:34px 20px;text-align:center;
+  background:var(--deep);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--ice);background:var(--panel)}
+.drop b{display:block;font-size:1rem;font-weight:600;margin-bottom:6px}
+.drop span{font-size:.8125rem;color:var(--ink3)}
+.picked{margin-top:14px;font-size:.8125rem;color:var(--ink2);
+  max-height:150px;overflow:auto;border-top:1px solid var(--line);padding-top:12px}
+.picked div{padding:3px 0;font-variant-numeric:tabular-nums}
+.bar{height:3px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-top:16px}
+.bar i{display:block;height:100%;width:0;background:var(--ice);transition:width .2s}
+
+.site{display:flex;align-items:center;gap:14px;padding:16px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.site .code{font-weight:600;font-size:1.0625rem;letter-spacing:-.02em}
+.site .meta{font-size:.75rem;color:var(--ink3);width:100%}
+.site .sp{margin-left:auto;display:flex;gap:8px}
+.warn{font-size:.75rem;color:#e0b155}
+.tip{font-size:.8125rem;color:var(--ink3);margin-top:12px;line-height:1.6}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Admin</h1>
+  <p class="sub">Upload a client site. Nobody but you should be on this page.</p>
+
+  <!-- ---------------------------------------------------------- key gate -->
+  <section id="gate">
+    <div class="row">
+      <label for="key">Admin key</label>
+      <input id="key" type="password" autocomplete="current-password" placeholder="">
+    </div>
+    <button id="unlock">Unlock</button>
+    <p class="msg" id="gate-msg"></p>
+  </section>
+
+  <!-- ------------------------------------------------------------ main -->
+  <section id="panel" class="hide">
+
+    <h2>Upload a site</h2>
+
+    <div class="row">
+      <label for="code">Client code</label>
+      <input id="code" type="text" autocapitalize="none" autocorrect="off"
+             spellcheck="false" placeholder="bergs-hvac">
+      <p class="tip">Lowercase letters, numbers and dashes. This is what they type on the hosting page, and what you read to them over the phone, so keep it sayable.</p>
+    </div>
+
+    <div class="drop" id="drop">
+      <b>Drop the client folder here</b>
+      <span>or tap to pick files. The homepage must be named index.html</span>
+      <input id="picker" type="file" multiple class="hide">
+    </div>
+
+    <div class="picked hide" id="picked"></div>
+    <div class="bar hide" id="bar"><i id="barfill"></i></div>
+
+    <div class="row" style="margin-top:20px">
+      <button id="send" disabled>Upload</button>
+      <button id="clear" class="ghost">Clear</button>
+    </div>
+    <p class="msg" id="up-msg"></p>
+
+    <h2>Sites already up</h2>
+    <div id="sites"><p class="sub" style="margin:0">Loading…</p></div>
+
+  </section>
+
+</div>
+
+<script>
+var API = "";              /* same domain — leave blank */
+var key = "";
+var files = [];            /* [{path, file}] */
+
+var $ = function(id){ return document.getElementById(id); };
+
+function msg(el, text, kind){
+  el.textContent = text || "";
+  el.className = "msg" + (kind ? " " + kind : "");
+}
+
+function headers(){ return { "x-admin-key": key }; }
+
+/* ------------------------------------------------------------ key gate */
+$("unlock").addEventListener("click", unlock);
+$("key").addEventListener("keydown", function(e){ if (e.key === "Enter") unlock(); });
+
+function unlock(){
+  key = $("key").value.trim();
+  if (!key) { msg($("gate-msg"), "Type your admin key.", "err"); return; }
+  msg($("gate-msg"), "Checking…", "busy");
+  fetch(API + "/api/list", { headers: headers() })
+    .then(function(r){
+      if (r.status === 401) throw new Error("That key was not accepted.");
+      if (!r.ok) throw new Error("Could not reach the uploader. Is the worker set up?");
+      return r.json();
+    })
+    .then(function(data){
+      sessionStorage.setItem("sfx-key", key);
+      $("gate").classList.add("hide");
+      $("panel").classList.remove("hide");
+      render(data.sites || []);
+    })
+    .catch(function(e){ msg($("gate-msg"), e.message, "err"); });
+}
+
+if (sessionStorage.getItem("sfx-key")){
+  $("key").value = sessionStorage.getItem("sfx-key");
+  unlock();
+}
+
+/* -------------------------------------------------------- picking files */
+var drop = $("drop"), picker = $("picker");
+
+drop.addEventListener("click", function(){ picker.click(); });
+picker.addEventListener("change", function(){
+  addFiles(Array.prototype.map.call(picker.files, function(f){
+    return { path: f.webkitRelativePath || f.name, file: f };
+  }));
+});
+
+["dragenter","dragover"].forEach(function(ev){
+  drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); });
+});
+["dragleave","drop"].forEach(function(ev){
+  drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); });
+});
+
+drop.addEventListener("drop", function(e){
+  e.preventDefault();
+  var items = e.dataTransfer.items;
+  if (items && items.length && items[0].webkitGetAsEntry){
+    var entries = [];
+    for (var i = 0; i < items.length; i++){
+      var en = items[i].webkitGetAsEntry();
+      if (en) entries.push(en);
+    }
+    Promise.all(entries.map(function(en){ return walk(en, ""); }))
+      .then(function(lists){ expand([].concat.apply([], lists)).then(addFiles); });
+  } else {
+    expand(Array.prototype.map.call(e.dataTransfer.files, function(f){
+      return { path: f.name, file: f };
+    })).then(addFiles);
+  }
+});
+
+/* unpack any .zip in the list into the real files inside it */
+function expand(list){
+  var jobs = list.map(function(item){
+    if (!/\.zip$/i.test(item.path)) return Promise.resolve([item]);
+    if (typeof JSZip === "undefined"){
+      msg($("up-msg"), "Could not unzip — no connection to the unzip library. Drag the folder instead.", "err");
+      return Promise.resolve([]);
+    }
+    return JSZip.loadAsync(item.file).then(function(zip){
+      var out = [];
+      zip.forEach(function(path, entry){
+        if (entry.dir) return;
+        if (/(^|\/)__MACOSX\//.test(path)) return;
+        if (/(^|\/)\.DS_Store$/.test(path)) return;
+        out.push(entry.async("blob").then(function(b){
+          return { path: path, file: new File([b], path.split("/").pop()) };
+        }));
+      });
+      return Promise.all(out);
+    }).catch(function(){
+      msg($("up-msg"), "That zip could not be opened.", "err");
+      return [];
+    });
+  });
+  return Promise.all(jobs).then(function(lists){
+    return [].concat.apply([], lists);
+  });
+}
+
+/* read a dropped folder, including anything nested inside it */
+function walk(entry, prefix){
+  return new Promise(function(resolve){
+    if (entry.isFile){
+      entry.file(function(f){ resolve([{ path: prefix + entry.name, file: f }]); },
+                 function(){ resolve([]); });
+    } else if (entry.isDirectory){
+      var reader = entry.createReader(), all = [];
+      (function readMore(){
+        reader.readEntries(function(batch){
+          if (!batch.length){
+            Promise.all(all.map(function(en){ return walk(en, prefix + entry.name + "/"); }))
+              .then(function(lists){ resolve([].concat.apply([], lists)); });
+            return;
+          }
+          all = all.concat(Array.prototype.slice.call(batch));
+          readMore();
+        }, function(){ resolve([]); });
+      })();
+    } else resolve([]);
+  });
+}
+
+function addFiles(list){
+  /* if everything shares one top folder, drop that folder from the paths so
+     index.html lands at the root of the client's code */
+  var top = null, shared = list.length > 0;
+  list.forEach(function(f){
+    var first = f.path.indexOf("/") > -1 ? f.path.split("/")[0] : null;
+    if (first === null) shared = false;
+    else if (top === null) top = first;
+    else if (top !== first) shared = false;
+  });
+  if (shared && top){
+    list = list.map(function(f){ return { path: f.path.slice(top.length + 1), file: f.file }; });
+    if (!$("code").value) $("code").value = top.toLowerCase().replace(/[^a-z0-9-]/g,"-");
+  }
+
+  files = files.concat(list).filter(function(f){ return f.path && f.file.size >= 0; });
+  showPicked();
+}
+
+function showPicked(){
+  var box = $("picked");
+  if (!files.length){ box.classList.add("hide"); $("send").disabled = true; return; }
+  box.classList.remove("hide");
+  var hasIndex = files.some(function(f){ return f.path === "index.html"; });
+  box.innerHTML = "";
+  files.forEach(function(f){
+    var d = document.createElement("div");
+    d.textContent = f.path + "  (" + Math.max(1, Math.round(f.file.size/1024)) + " KB)";
+    box.appendChild(d);
+  });
+  if (!hasIndex){
+    var w = document.createElement("div");
+    w.className = "warn";
+    w.textContent = "No index.html in here. The site will not open until there is one.";
+    box.appendChild(w);
+  }
+  $("send").disabled = false;
+}
+
+$("clear").addEventListener("click", function(){
+  files = []; picker.value = ""; showPicked(); msg($("up-msg"), "");
+});
+
+/* ---------------------------------------------------------- uploading */
+$("send").addEventListener("click", function(){
+  var code = $("code").value.toLowerCase().trim()
+              .replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"");
+  if (!code){ msg($("up-msg"), "Give it a client code first.", "err"); return; }
+  if (!files.length){ msg($("up-msg"), "No files picked.", "err"); return; }
+
+  $("send").disabled = true;
+  $("bar").classList.remove("hide");
+  var done = 0;
+
+  function step(i){
+    if (i >= files.length){
+      msg($("up-msg"), "Done. Live at /sites/" + code + "/ — tell them the code is " + code + ".", "ok");
+      $("send").disabled = false;
+      files = []; picker.value = ""; showPicked();
+      refresh();
+      return;
+    }
+    var f = files[i];
+    var fd = new FormData();
+    fd.append("code", code);
+    fd.append("path", f.path);
+    fd.append("file", f.file);
+    if (i === 0) fd.append("replace", "yes");   /* first file wipes the old version */
+
+    msg($("up-msg"), "Uploading " + (i+1) + " of " + files.length + " — " + f.path, "busy");
+
+    fetch(API + "/api/upload", { method:"POST", headers: headers(), body: fd })
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Upload failed"); return j; }); })
+      .then(function(){
+        done++;
+        $("barfill").style.width = Math.round(done / files.length * 100) + "%";
+        step(i + 1);
+      })
+      .catch(function(e){
+        msg($("up-msg"), "Stopped on " + f.path + ": " + e.message, "err");
+        $("send").disabled = false;
+      });
+  }
+  step(0);
+});
+
+/* ------------------------------------------------------- existing sites */
+function refresh(){
+  fetch(API + "/api/list", { headers: headers() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ render(d.sites || []); })
+    .catch(function(){});
+}
+
+function render(sites){
+  var box = $("sites");
+  if (!sites.length){ box.innerHTML = '<p class="sub" style="margin:0">Nothing uploaded yet.</p>'; return; }
+  box.innerHTML = "";
+  sites.forEach(function(s){
+    var row = document.createElement("div");
+    row.className = "site";
+
+    var code = document.createElement("span");
+    code.className = "code";
+    code.textContent = s.code;
+    row.appendChild(code);
+
+    var sp = document.createElement("span");
+    sp.className = "sp";
+
+    var open = document.createElement("button");
+    open.className = "ghost";
+    open.style.fontSize = ".8125rem";
+    open.style.padding = "8px 14px";
+    open.textContent = "Open";
+    open.addEventListener("click", function(){ window.open("/sites/" + s.code + "/", "_blank"); });
+    sp.appendChild(open);
+
+    var del = document.createElement("button");
+    del.className = "danger";
+    del.textContent = "Delete";
+    del.addEventListener("click", function(){
+      if (!confirm("Delete " + s.code + "? The client's link stops working straight away.")) return;
+      fetch(API + "/api/delete", {
+        method:"POST",
+        headers: Object.assign({ "content-type":"application/json" }, headers()),
+        body: JSON.stringify({ code: s.code })
+      }).then(refresh);
+    });
+    sp.appendChild(del);
+    row.appendChild(sp);
+
+    var meta = document.createElement("span");
+    meta.className = "meta";
+    var when = s.updated ? new Date(s.updated).toLocaleDateString() : "";
+    meta.textContent = s.files + " files · " + Math.max(1, Math.round(s.bytes/1024)) + " KB"
+                     + (when ? " · " + when : "")
+                     + (s.hasIndex ? "" : " · NO index.html, will not open");
+    row.appendChild(meta);
+
+    box.appendChild(row);
+  });
+}
+</script>
+
+</body>
+</html>
